@@ -16,6 +16,22 @@ const resolvers = {
 			const usuarioId = await jwt.verify(token, process.env.SECRETA);
 			return usuarioId;
 		},
+		obtenerProductos: async () => {
+			try {
+				const productos = await Producto.find({});
+				return productos;
+			} catch (error) {
+				console.log(error);
+			}
+		},
+		obtenerProducto: async (_, { id }) => {
+			//revisar si existe o no
+			const producto = await Producto.findById(id);
+			if (!producto) {
+				throw new Error("Producto no encontrado");
+			}
+			return producto;
+		},
 	},
 	Mutation: {
 		nuevoUsuario: async (_, { input }) => {
@@ -61,8 +77,6 @@ const resolvers = {
 			};
 		},
 		nuevoProducto: async (_, { input }) => {
-			console.log("entro");
-
 			try {
 				const producto = new Producto(input);
 
@@ -72,6 +86,30 @@ const resolvers = {
 			} catch (error) {
 				console.log(error);
 			}
+		},
+		actualizarProducto: async (_, { id, input }) => {
+			//revisar si existe o no
+			let producto = await Producto.findById(id);
+			if (!producto) {
+				throw new Error("Producto no encontrado");
+			}
+
+			// guardar en base
+			producto = await Producto.findOneAndUpdate({ _id: id }, input, {
+				new: true,
+			});
+			return producto;
+		},
+		eliminarProducto: async (_, { id }) => {
+			console.log(id);
+			//revisar si existe o no
+			let producto = await Producto.findById(id);
+			if (!producto) {
+				throw new Error("Producto no encontrado");
+			}
+			await Producto.findOneAndDelete({ _id: id });
+
+			return "Producto Eliminado";
 		},
 	},
 };
