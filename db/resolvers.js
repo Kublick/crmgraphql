@@ -1,5 +1,6 @@
 const Usuario = require("../models/usuarios");
 const Producto = require("../models/Producto");
+const Cliente = require("../models/Clientes");
 const bcryptjs = require("bcryptjs");
 require("dotenv").config({ path: "variables.env" });
 const jwt = require("jsonwebtoken");
@@ -110,6 +111,25 @@ const resolvers = {
 			await Producto.findOneAndDelete({ _id: id });
 
 			return "Producto Eliminado";
+		},
+		nuevoCliente: async (_, { input }) => {
+			const { email } = input;
+
+			//verificar si esta registrado
+			const cliente = await Cliente.findOne({ email });
+			if (cliente) {
+				throw new Error("Ese cliente ya esta registrado");
+			}
+			const nuevoCliente = new Cliente(input);
+			// asignar vendedor
+			nuevoCliente.vendedor = "5f2a209eb3693d285a927bdb";
+			// guardar en base de datos
+			try {
+				const res = await nuevoCliente.save();
+				return res;
+			} catch (error) {
+				console.log(error);
+			}
 		},
 	},
 };
